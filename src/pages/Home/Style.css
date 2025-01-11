@@ -1,0 +1,43 @@
+.container {
+    margin-top: 3rem;
+}
+
+h2 {
+    text-align: center;
+    padding-bottom: 1rem;
+}
+
+p {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background-color: #ffffff; /* Light background */
+    border: 1px solid rgb(255, 252, 252); /* Light border */
+    border-radius: 0.25rem; /* Round corners */
+    margin-bottom: 1rem; /* Space between cards */
+    padding: 1rem; /* Padding inside card */
+    box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.15); /* Add some shadow */
+}
+
+.card-title {
+    margin-top: 1rem;
+}
+
+.card-text {
+    margin-bottom: 1rem;
+}
+
+.badge {
+    background-color: #dc3545; /* Bootstrap danger color */
+}
+
+.btn-light {
+    background-color: #ffffff; /* Light button color */
+    border: 1px solid #ced4da; /* Light border */
+}
+
+.btn-light:hover {
+    background-color: #e2e6ea; /* Darken on hover */
+}

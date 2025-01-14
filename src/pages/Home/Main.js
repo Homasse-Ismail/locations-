@@ -12,16 +12,23 @@ const Main = () => {
     date_depart: "",
     date_arrivee: "",
     ville_depart: "",
-    ville_arrivee: ""
   });
   const navigate = useNavigate();
 
   const isDateValid = (dateDepart, dateArrivee) => {
+    if (!dateDepart || !dateArrivee) {
+      return "Les dates de départ et d'arrivée doivent être renseignées.";
+    }
+
     const today = new Date();
     const departDate = new Date(dateDepart);
     const arriveeDate = new Date(dateArrivee);
 
-    if (departDate < today) {
+    if (isNaN(departDate) || isNaN(arriveeDate)) {
+      return "Les dates saisies sont invalides.";
+    }
+
+    if (departDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)) {
       return "La date de départ ne peut pas être dans le passé.";
     }
 
@@ -34,21 +41,21 @@ const Main = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormValues({
-      ...formValues,
-      [name]: value
-    });
-
-    if (name === "date_depart" || name === "date_arrivee") {
-      const dateError = isDateValid(formValues.date_depart, formValues.date_arrivee);
-      setValidationError(dateError);
-    }
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
   };
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
 
-    const { date_depart, date_arrivee, ville_depart, ville_arrivee } = formValues;
+    const { date_depart, date_arrivee, ville_depart } = formValues;
+
+    if (!ville_depart.trim()) {
+      setValidationError("La ville de départ doit être renseignée.");
+      return;
+    }
 
     const dateError = isDateValid(date_depart, date_arrivee);
     if (dateError) {
@@ -58,91 +65,89 @@ const Main = () => {
 
     setValidationError("");
 
-    try {
-      const response = await fetch(
-        `/api/cars/search?date_depart=${date_depart}&date_arrivee=${date_arrivee}&ville_depart=${ville_depart}&ville_arrivee=${ville_arrivee}`
-      );
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des données");
-      }
-      const data = await response.json();
-      navigate("/results", { state: { results: data } });
-    } catch (err) {
-      setError("Impossible de récupérer les résultats. Essayez plus tard.");
-    }
+    navigate("/Service", { state: { date_depart, date_arrivee, ville_depart } });
   };
 
   return (
     <div>
-    <div className="container mt-5">
-      <img
-        src="https://pics.craiyon.com/2023-10-07/a5bb248ed4714a639afdd8055c5a70c3.webp"
-        alt="Background"
-        className="img-fluid w-100"
-        style={{ opacity: 0.9, height: "auto", maxHeight: "450px", objectFit: "cover" }}
-      />
-      <form
-        onSubmit={handleSearch}
-        className="bg-transparent p-4 rounded shadow-sm position-absolute top-50 start-50 translate-middle w-75"
-        style={{ backdropFilter: "blur(10px)", backgroundColor: "rgba(255, 255, 255, 0.7)" }}
-      >
-        <h2 className="text-center text-light mb-4">Réserver un véhicule </h2>
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label text-light">Date de départ:</label>
-            <input
-              type="date"
-              name="date_depart"
-              className="form-control"
-              value={formValues.date_depart}
-              onChange={handleInputChange}
-              min={new Date().toISOString().split('T')[0]}
-            />
+      <div className="container mt-5">
+        <img
+          src="https://pics.craiyon.com/2023-10-07/a5bb248ed4714a639afdd8055c5a70c3.webp"
+          alt="Background"
+          className="img-fluid w-100"
+          style={{
+            opacity: 0.9,
+            height: "auto",
+            maxHeight: "450px",
+            objectFit: "cover",
+          }}
+        />
+        <form
+          onSubmit={handleSearch}
+          className="bg-transparent p-4 rounded shadow-sm position-absolute top-50 start-50 translate-middle w-75"
+          style={{
+            backdropFilter: "blur(10px)",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+          }}
+        >
+          <h2 className="text-center text-light mb-4">Réserver un véhicule </h2>
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <label className="form-label text-light">Date de départ:</label>
+              <input
+                type="date"
+                name="date_depart"
+                className="form-control"
+                value={formValues.date_depart}
+                onChange={handleInputChange}
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label text-light">Date d'arrivée:</label>
+              <input
+                type="date"
+                name="date_arrivee"
+                className="form-control"
+                value={formValues.date_arrivee}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
-          <div className="col-md-6">
-            <label className="form-label text-light">Date d'arrivée:</label>
-            <input
-              type="date"
-              name="date_arrivee"
-              className="form-control"
-              value={formValues.date_arrivee}
-              onChange={handleInputChange}
-            />
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <label className="form-label text-light">Ville de départ:</label>
+              <input
+                type="text"
+                name="ville_depart"
+                className="form-control"
+                value={formValues.ville_depart}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
-        </div>
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label text-light">Ville de départ:</label>
-            <input
-              type="text"
-              name="ville_depart"
-              className="form-control"
-              value={formValues.ville_depart}
-              onChange={handleInputChange}
-            />
+          <div className="text-center">
+            <button
+              type="submit"
+              className="btn btn-danger"
+              disabled={
+                !!validationError ||
+                !formValues.date_depart ||
+                !formValues.date_arrivee ||
+                !formValues.ville_depart
+              }
+            >
+              Rechercher
+            </button>
           </div>
-          <div className="col-md-6">
-            <label className="form-label text-light">Ville d'arrivée:</label>
-            <input
-              type="text"
-              name="ville_arrivee"
-              className="form-control"
-              value={formValues.ville_arrivee}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-        <div className="text-center">
-          <button type="submit" className="btn btn-danger" disabled={!!validationError}>
-            Rechercher
-          </button>
-        </div>
-        {validationError && <div className="text-danger mt-3 text-center">{validationError}</div>}
-        {error && <h6 className="text-light mt-3 text-center">{error}</h6>}
-      </form>
-    </div>
+          {validationError && (
+            <div className="text-danger mt-3 text-center">{validationError}</div>
+          )}
+          {error && <h6 className="text-light mt-3 text-center">{error}</h6>}
+        </form>
+      </div>
       <div className="container">
-      <About />
+        <About />
       </div>
       <Section />
       <CarRentalNews />
